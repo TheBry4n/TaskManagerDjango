@@ -1,0 +1,65 @@
+/* ===== ACCOUNTS SPECIFIC STYLES ===== */
+
+/* Auth Forms */
+.auth-card {
+    max-width: 400px;
+    margin: 2rem auto;
+}
+
+.auth-form .form-control {
+    height: 50px;
+    font-size: 1rem;
+}
+
+.auth-form .btn {
+    height: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.auth-links {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.auth-links a {
+    color: var(--primary-green);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.auth-links a:hover {
+    color: var(--primary-green-hover);
+    text-decoration: underline;
+}
+
+/* Profile Page */
+.profile-info {
+    background-color: #f8f9fa;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+}
+
+.profile-actions .btn {
+    margin-bottom: 0.5rem;
+}
+
+/* Form Errors */
+.form-errors {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 0.5rem;
+    border-radius: var(--border-radius);
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+}
+
+/* Success Messages */
+.success-message {
+    background-color: #d1eddd;
+    color: #155724;
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    text-align: center;
+    font-weight: 500;
+}

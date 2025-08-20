@@ -1,0 +1,53 @@
+{% extends "base/base.html" %}
+{% load static %}
+
+{% block title %}Registrazione - Task Manager{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/accounts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card auth-card">
+            <div class="card-header text-center">
+                <h4 class="mb-0">Registrazione</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" class="auth-form">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="{{ form.username.id_for_label }}" class="form-label">Username</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}
+                            <div class="form-errors">{{ form.username.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.password1.id_for_label }}" class="form-label">Password</label>
+                        {{ form.password1 }}
+                        {% if form.password1.errors %}
+                            <div class="form-errors">{{ form.password1.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        <label for="{{ form.password2.id_for_label }}" class="form-label">Conferma Password</label>
+                        {{ form.password2 }}
+                        {% if form.password2.errors %}
+                            <div class="form-errors">{{ form.password2.errors }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Registrati</button>
+                    </div>
+                </form>
+                <hr>
+                <div class="auth-links">
+                    <p>Hai già un account? <a href="{% url 'accounts:login' %}">Accedi</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

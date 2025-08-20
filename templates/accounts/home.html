@@ -1,0 +1,52 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Home - Task Manager{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/accounts.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header text-center">
+                <h3 class="mb-0">Benvenuto in Task Manager</h3>
+            </div>
+            <div class="card-body text-center">
+                <p class="lead">Gestisci le tue task in modo semplice ed efficiente!</p>
+                
+                {% if user.is_authenticated %}
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Le tue Task</h5>
+                                    <p class="card-text">Visualizza e gestisci tutte le tue task.</p>
+                                    <a href="#" class="btn btn-primary">Vai alle Task</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-body">
+                                    <h5 class="card-title">Il tuo Profilo</h5>
+                                    <p class="card-text">Gestisci le tue informazioni personali.</p>
+                                    <a href="{% url 'accounts:profile' %}" class="btn btn-outline-primary">Vai al Profilo</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="mt-4">
+                        <p>Per iniziare, registrati o accedi al tuo account.</p>
+                        <a href="{% url 'accounts:register' %}" class="btn btn-primary me-2">Registrati</a>
+                        <a href="{% url 'accounts:login' %}" class="btn btn-outline-primary">Accedi</a>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
