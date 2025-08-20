@@ -76,35 +76,35 @@ jobs:
                 # Pull latest changes
                 git pull origin master
                 
-                # Check if dev branch exists
-                if ! git show-ref --verify --quiet refs/remotes/origin/dev; then
-                  echo "ERROR: Dev branch does not exist!"
+                # Check if development branch exists
+                if ! git show-ref --verify --quiet refs/remotes/origin/development; then
+                  echo "ERROR: Development branch does not exist!"
                   exit 1
                 fi
                 
-                # Merge dev into master
+                # Merge development into master
                 if [ "${{ inputs.force_merge }}" = "true" ]; then
-                  git merge origin/dev --no-edit -m "${{ inputs.merge_message }}"
+                  git merge origin/development --no-edit -m "${{ inputs.merge_message }}"
                 else
-                  git merge origin/dev --no-edit -m "${{ inputs.merge_message }}"
+                  git merge origin/development --no-edit -m "${{ inputs.merge_message }}"
                 fi
                 
                 # Push to master
                 git push origin master
                 
-                echo "✅ Successfully merged dev into master"
+                echo "✅ Successfully merged development into master"
             
             - name: Create merge summary
               if: success()
               run: |
                 echo "## 🎉 Merge Summary" >> $GITHUB_STEP_SUMMARY
                 echo "" >> $GITHUB_STEP_SUMMARY
-                echo "**Branch:** dev → master" >> $GITHUB_STEP_SUMMARY
+                echo "**Branch:** development → master" >> $GITHUB_STEP_SUMMARY
                 echo "**Status:** ✅ Successfully merged" >> $GITHUB_STEP_SUMMARY
                 echo "**Message:** ${{ inputs.merge_message }}" >> $GITHUB_STEP_SUMMARY
                 echo "" >> $GITHUB_STEP_SUMMARY
                 echo "### Changes included:" >> $GITHUB_STEP_SUMMARY
-                git log --oneline master..origin/dev >> $GITHUB_STEP_SUMMARY
+                git log --oneline master..origin/development >> $GITHUB_STEP_SUMMARY
 
     notify-success:
         needs: test-and-merge
@@ -115,5 +115,5 @@ jobs:
             - name: Success notification
               run: |
                 echo "🎉 Merge completed successfully!"
-                echo "Dev branch has been merged into master"
+                echo "Development branch has been merged into master"
                 echo "All tests passed"
