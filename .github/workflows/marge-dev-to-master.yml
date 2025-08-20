@@ -70,41 +70,41 @@ jobs:
                 git config --local user.email "github-actions[bot]@users.noreply.github.com"
                 git config --local user.name "github-actions[bot]"
                 
-                # Checkout main branch
-                git checkout main
+                # Checkout master branch
+                git checkout master
                 
                 # Pull latest changes
-                git pull origin main
+                git pull origin master
                 
-                # Check if development branch exists
-                if ! git show-ref --verify --quiet refs/remotes/origin/development; then
-                  echo "ERROR: Development branch does not exist!"
+                # Check if dev branch exists
+                if ! git show-ref --verify --quiet refs/remotes/origin/dev; then
+                  echo "ERROR: Dev branch does not exist!"
                   exit 1
                 fi
                 
-                # Merge development into main
+                # Merge dev into master
                 if [ "${{ inputs.force_merge }}" = "true" ]; then
-                  git merge origin/development --no-edit -m "${{ inputs.merge_message }}"
+                  git merge origin/dev --no-edit -m "${{ inputs.merge_message }}"
                 else
-                  git merge origin/development --no-edit -m "${{ inputs.merge_message }}"
+                  git merge origin/dev --no-edit -m "${{ inputs.merge_message }}"
                 fi
                 
-                # Push to main
-                git push origin main
+                # Push to master
+                git push origin master
                 
-                echo "✅ Successfully merged development into main"
+                echo "✅ Successfully merged dev into master"
             
             - name: Create merge summary
               if: success()
               run: |
                 echo "## 🎉 Merge Summary" >> $GITHUB_STEP_SUMMARY
                 echo "" >> $GITHUB_STEP_SUMMARY
-                echo "**Branch:** development → main" >> $GITHUB_STEP_SUMMARY
+                echo "**Branch:** dev → master" >> $GITHUB_STEP_SUMMARY
                 echo "**Status:** ✅ Successfully merged" >> $GITHUB_STEP_SUMMARY
                 echo "**Message:** ${{ inputs.merge_message }}" >> $GITHUB_STEP_SUMMARY
                 echo "" >> $GITHUB_STEP_SUMMARY
                 echo "### Changes included:" >> $GITHUB_STEP_SUMMARY
-                git log --oneline main..origin/development >> $GITHUB_STEP_SUMMARY
+                git log --oneline master..origin/dev >> $GITHUB_STEP_SUMMARY
 
     notify-success:
         needs: test-and-merge
@@ -115,5 +115,5 @@ jobs:
             - name: Success notification
               run: |
                 echo "🎉 Merge completed successfully!"
-                echo "Development branch has been merged into main"
+                echo "Dev branch has been merged into master"
                 echo "All tests passed"
