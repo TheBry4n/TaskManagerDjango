@@ -272,7 +272,7 @@ Questo progetto è sotto licenza MIT. Vedi il file `LICENSE` per dettagli.
 
 ## 👨‍💻 Autore
 
-Creato come progetto di esempio per dimostrare le best practices di Django con pattern Repository e gestione automatica delle scadenze.
+Creato da [TheBry4n](https://github.com/TheBry4n) come progetto di esempio per dimostrare le best practices di Django con pattern Repository e gestione automatica delle scadenze.
 
 ---
 
