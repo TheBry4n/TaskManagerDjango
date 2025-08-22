@@ -22,9 +22,9 @@ class Command(BaseCommand):
                 self.style.SUCCESS(f'Force updated {updated_count} overdue tasks')
             )
         else:
-            updated_count = repository.update_task_status()
+            updated_count = repository.ensure_overdue_tasks_are_failed()
             self.stdout.write(
-                self.style.SUCCESS(f'Updated {updated_count} overdue tasks')
+                self.style.SUCCESS(f'Updated {updated_count} overdue tasks to failed status')
             )
         
         # Show current statistics

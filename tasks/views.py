@@ -13,28 +13,22 @@ def task_list(request):
     """View for listing all tasks"""
     repository = TaskRepository()
     
-    # Update task status automatically (check for overdue tasks)
-    repository.update_task_status()
+    # Ensure all overdue tasks are properly marked as failed
+    updated_count = repository.ensure_overdue_tasks_are_failed()
+    
+    if updated_count > 0:
+        messages.info(request, f'{updated_count} overdue task(s) have been marked as failed.')
 
-    # Get tasks by status
-    active_tasks_qs = repository.get_active_tasks_by_user(request.user)
+    # Get tasks by status (now properly separated)
+    active_tasks = repository.get_active_tasks_by_user(request.user)
     completed_tasks = repository.get_completed_tasks_by_user(request.user)
     failed_tasks = repository.get_failed_tasks_by_user(request.user)
 
-    # Split active tasks into on-time and overdue for display purposes
-    now = timezone.now()
-    active_tasks = active_tasks_qs.filter(due_date__gte=now)
-    overdue_active_tasks = active_tasks_qs.filter(due_date__lt=now)
-
-    failed_count = failed_tasks.count() + overdue_active_tasks.count()
-
     context = {
-        "active_tasks" : active_tasks,
-        "completed_tasks" : completed_tasks,
-        "failed_tasks" : failed_tasks,
-        "overdue_active_tasks": overdue_active_tasks,
-        "failed_count": failed_count,
-        "total_tasks" : active_tasks.count() + completed_tasks.count() + failed_count,
+        "active_tasks": active_tasks,
+        "completed_tasks": completed_tasks,
+        "failed_tasks": failed_tasks,
+        "total_tasks": active_tasks.count() + completed_tasks.count() + failed_tasks.count(),
     }
 
     return render(request, "tasks/task_list.html", context)
@@ -52,7 +46,15 @@ def task_create(request):
                 description = form.cleaned_data["description"],
                 due_date = form.cleaned_data["due_date"],
             )
-            messages.success(request, f'Task "{task.title}" created successfully!')
+            
+            # Check if the newly created task is overdue and update it immediately
+            if task.is_overdue:
+                task.status = "failed"
+                task.save()
+                messages.success(request, f'Task "{task.title}" created successfully! (Marked as failed - overdue)')
+            else:
+                messages.success(request, f'Task "{task.title}" created successfully!')
+            
             return redirect("tasks:task_list")
     else:
         form = TaskForm()
@@ -64,8 +66,8 @@ def task_detail(request, task_id):
     """Display task details"""
     repository = TaskRepository()
     
-    # Update task status automatically (check for overdue tasks)
-    repository.update_task_status()
+    # Ensure all overdue tasks are properly marked as failed
+    repository.ensure_overdue_tasks_are_failed()
     
     task = repository.get_by_id(task_id)
 
@@ -170,16 +172,13 @@ def api_task_status(request):
     """API endpoint for task status"""
     repository = TaskRepository()
 
-    updated_count = repository.update_task_status()
-    # Counts aligned with display logic
-    active_qs = repository.get_active_tasks_by_user(request.user)
-    now = timezone.now()
-    active_count = active_qs.filter(due_date__gte=now).count()
+    # Ensure all overdue tasks are properly marked as failed
+    updated_count = repository.ensure_overdue_tasks_are_failed()
+    
+    # Get clean counts after status update
+    active_count = repository.get_active_tasks_by_user(request.user).count()
     completed_count = repository.get_completed_tasks_by_user(request.user).count()
-    failed_count = (
-        repository.get_failed_tasks_by_user(request.user).count() +
-        active_qs.filter(due_date__lt=now).count()
-    )
+    failed_count = repository.get_failed_tasks_by_user(request.user).count()
 
     return JsonResponse({
         'updated_count': updated_count,
@@ -187,3 +186,5 @@ def api_task_status(request):
         'completed_count': completed_count,
         'failed_count': failed_count,
     })
+
+

@@ -24,8 +24,9 @@ class TaskRepository(BaseRepository[Task]):
         return self.filter(status="failed", user=user)
     
     def get_overdue_tasks_by_user(self, user: User) -> QuerySet[Task]:
-        """Get all overdue tasks"""
-        return self.filter(user=user, due_date__lt=timezone.now())
+        """Get all overdue tasks (regardless of status) using local time"""
+        now = timezone.localtime(timezone.now())
+        return self.filter(user=user, due_date__lt=now)
     
     def get_active_tasks(self) -> QuerySet[Task]:
         """Get only active tasks (all users)"""
@@ -40,15 +41,52 @@ class TaskRepository(BaseRepository[Task]):
         return self.filter(status='failed')
     
     def get_overdue_tasks(self) -> QuerySet[Task]:
-        """Get overdue tasks (all users)"""
-        return self.filter(due_date__lt=timezone.now())
+        """Get overdue tasks (all users) using local time"""
+        now = timezone.localtime(timezone.now())
+        return self.filter(due_date__lt=now)
     
     def update_task_status(self) -> int:
-        """Automatically update task status based on due date and current date"""
-        overdue_tasks = self.filter(status="active", due_date__lt=timezone.now())
-        updated_count = overdue_tasks.count()
+        """
+        Automatically update task status based on due date and current date.
+        Returns the number of tasks that were updated.
+        """
+        # Find all active tasks that are overdue using local time
+        now = timezone.localtime(timezone.now())
+        overdue_active_tasks = self.filter(
+            status="active", 
+            due_date__lt=now
+        )
+        
+        updated_count = overdue_active_tasks.count()
+        
         if updated_count > 0:
-            overdue_tasks.update(status="failed")
+            # Update all overdue active tasks to failed status
+            overdue_active_tasks.update(status="failed")
+        
+        return updated_count
+    
+    def ensure_overdue_tasks_are_failed(self) -> int:
+        """
+        Ensure all overdue tasks are marked as failed.
+        This is a more comprehensive method that checks all tasks.
+        Returns the number of tasks that were updated.
+        """
+        # Find all overdue tasks that are still active using local time
+        now = timezone.localtime(timezone.now())
+        overdue_active_tasks = self.filter(
+            status="active", 
+            due_date__lt=now
+        )
+        
+        updated_count = overdue_active_tasks.count()
+        
+        if updated_count > 0:
+            # Update all overdue active tasks to failed status
+            # Use a more explicit approach
+            for task in overdue_active_tasks:
+                task.status = "failed"
+                task.save()
+        
         return updated_count
     
     def force_update_all_overdue_tasks(self) -> int:

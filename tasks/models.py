@@ -34,18 +34,22 @@ class Task(models.Model):
     
     @property
     def is_overdue(self):
-        """Check if the task is overdue"""
-        return timezone.now() > self.due_date
+        """Check if the task is overdue using local time"""
+        now = timezone.localtime(timezone.now())
+        due_local = timezone.localtime(self.due_date)
+        return now > due_local
     
     @property
     def days_until_due(self):
-        """Calculate the number of days until the task is due"""
-        delta = self.due_date - timezone.now()
+        """Calculate the number of days until the task is due using local time"""
+        now = timezone.localtime(timezone.now())
+        due_local = timezone.localtime(self.due_date)
+        delta = due_local - now
         return delta.days
     
     @property
     def overdue_days(self):
-        """Calculate the number of days the task is overdue (positive number)"""
+        """Calculate the number of days the task is overdue (positive number) using local time"""
         if self.is_overdue:
             return abs(self.days_until_due)
         return 0

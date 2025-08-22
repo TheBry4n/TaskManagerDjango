@@ -114,7 +114,7 @@
                         <h5 class="mb-0">Reactivate Task</h5>
                     </div>
                     <div class="card-body">
-                        <form method="post" action="{% url 'tasks:task_reactivate' task.id %}">
+                        <form method="post" action="{% url 'tasks:reactivate_task' task.id %}">
                             {% csrf_token %}
                             
                             <div class="mb-3">

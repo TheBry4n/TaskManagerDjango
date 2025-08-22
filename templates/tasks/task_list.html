@@ -9,9 +9,6 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <h1>My Tasks</h1>
                 <div class="d-flex gap-2">
-                    <button id="refresh-tasks" class="btn btn-outline-secondary" onclick="refreshTaskStatus()">
-                        <i class="fas fa-sync-alt"></i> Refresh Status
-                    </button>
                     <a href="{% url 'tasks:task_create' %}" class="btn btn-primary">
                         <i class="fas fa-plus"></i> New Task
                     </a>
@@ -48,7 +45,7 @@
                     <div class="card bg-danger text-white">
                         <div class="card-body text-center">
                             <h5 class="card-title">Failed</h5>
-                            <h3>{{ failed_count }}</h3>
+                            <h3>{{ failed_tasks.count }}</h3>
                         </div>
                     </div>
                 </div>
@@ -66,7 +63,7 @@
                         <div class="row">
                             {% for task in active_tasks %}
                                 <div class="col-md-6 mb-3">
-                                    <div class="card h-100 {% if task.is_overdue %}border-danger{% endif %}">
+                                    <div class="card h-100">
                                         <div class="card-body">
                                             <h6 class="card-title">{{ task.title }}</h6>
                                             <p class="card-text text-muted">{{ task.description|truncatewords:20 }}</p>
@@ -83,9 +80,9 @@
                                                     </form>
                                                 </div>
                                             </div>
-                                            {% if task.is_overdue %}
+                                            {% if task.days_until_due <= 1 and task.days_until_due >= 0 %}
                                                 <div class="mt-2">
-                                                    <span class="badge bg-danger">Overdue</span>
+                                                    <span class="badge bg-warning">Due soon</span>
                                                 </div>
                                             {% endif %}
                                         </div>
@@ -142,7 +139,7 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    {% if failed_tasks or overdue_active_tasks %}
+                    {% if failed_tasks %}
                         <div class="row">
                             {% for task in failed_tasks %}
                                 <div class="col-md-6 mb-3">
@@ -156,9 +153,7 @@
                                                 </small>
                                                 <div class="btn-group">
                                                     <a href="{% url 'tasks:task_detail' task.id %}" class="btn btn-sm btn-outline-primary">View</a>
-                                                    {% if task.status == 'failed' %}
-                                                        <a href="{% url 'tasks:task_detail' task.id %}" class="btn btn-sm btn-outline-warning">Reactivate</a>
-                                                    {% endif %}
+                                                    <a href="{% url 'tasks:task_detail' task.id %}" class="btn btn-sm btn-outline-warning">Reactivate</a>
                                                     <form method="post" action="{% url 'tasks:task_delete' task.id %}" class="d-inline">
                                                         {% csrf_token %}
                                                         <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure?')">Delete</button>
@@ -170,31 +165,8 @@
                                                     <span class="badge bg-warning">Reactivated {{ task.reactivation_count }} times</span>
                                                 </div>
                                             {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                            {% for task in overdue_active_tasks %}
-                                <div class="col-md-6 mb-3">
-                                    <div class="card h-100 border-danger">
-                                        <div class="card-body">
-                                            <h6 class="card-title">{{ task.title }}</h6>
-                                            <p class="card-text text-muted">{{ task.description|truncatewords:20 }}</p>
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <small class="text-muted">
-                                                    Overdue since: {{ task.due_date|date:"M d, Y H:i" }}
-                                                </small>
-                                                <div class="btn-group">
-                                                    <a href="{% url 'tasks:task_detail' task.id %}" class="btn btn-sm btn-outline-primary">View</a>
-                                                    <a href="{% url 'tasks:task_update' task.id %}" class="btn btn-sm btn-outline-warning">Edit</a>
-                                                    <form method="post" action="{% url 'tasks:task_complete' task.id %}" class="d-inline">
-                                                        {% csrf_token %}
-                                                        <button type="submit" class="btn btn-sm btn-success">Complete</button>
-                                                    </form>
-                                                </div>
-                                            </div>
                                             <div class="mt-2">
-                                                <span class="badge bg-danger">Overdue (active)</span>
+                                                <span class="badge bg-danger">Overdue by {{ task.overdue_days }} day(s)</span>
                                             </div>
                                         </div>
                                     </div>

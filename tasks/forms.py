@@ -53,7 +53,7 @@ class TaskForm(BaseTaskForm, forms.ModelForm):
         
         return cleaned_data
 
-class TaskReactivationForm(BaseTaskForm, forms.Form):
+class TaskReactivationForm(forms.Form):
     """Form for reactivating a failed task"""
     new_due_date = forms.DateTimeField(
         widget = forms.DateTimeInput(attrs = {
@@ -64,5 +64,11 @@ class TaskReactivationForm(BaseTaskForm, forms.Form):
     )
     
     def clean_new_due_date(self):
-        return self.clean_future_datetime('new_due_date')
+        """Validate that the new due date is in the future"""
+        datetime_value = self.cleaned_data.get('new_due_date')
+        if datetime_value and datetime_value <= timezone.now():
+            raise forms.ValidationError(
+                "New due date must be in the future"
+            )
+        return datetime_value
 

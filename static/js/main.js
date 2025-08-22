@@ -82,8 +82,8 @@ function autoUpdateTaskStatus() {
             // If any tasks were updated, reload the page to show the changes
             if (data.updated_count > 0) {
                 console.log(`${data.updated_count} tasks were automatically updated to failed status`);
-                // Optionally reload the page to show the updated task lists
-                // window.location.reload();
+                // Reload the page to show the updated task lists
+                window.location.reload();
             }
         })
         .catch(error => {
@@ -92,61 +92,9 @@ function autoUpdateTaskStatus() {
     }, 30000); // Check every 30 seconds
 }
 
-// Manual refresh function
-function refreshTaskStatus() {
-    const button = document.getElementById('refresh-tasks');
-    if (button) {
-        button.disabled = true;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
-    }
-    
-    fetch('/tasks/api/status/', {
-        method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Update the statistics cards
-        const totalElement = document.querySelector('.card.bg-primary h3');
-        const activeElement = document.querySelector('.card.bg-success h3');
-        const completedElement = document.querySelector('.card.bg-info h3');
-        const failedElement = document.querySelector('.card.bg-danger h3');
-        
-        if (totalElement) {
-            const total = data.active_count + data.completed_count + data.failed_count;
-            totalElement.textContent = total;
-        }
-        if (activeElement) {
-            activeElement.textContent = data.active_count;
-        }
-        if (completedElement) {
-            completedElement.textContent = data.completed_count;
-        }
-        if (failedElement) {
-            failedElement.textContent = data.failed_count;
-        }
-        
-        // Show message if tasks were updated
-        if (data.updated_count > 0) {
-            alert(`${data.updated_count} tasks were automatically moved to failed status!`);
-            window.location.reload(); // Reload to show updated task lists
-        } else {
-            alert('No tasks needed to be updated.');
-        }
-    })
-    .catch(error => {
-        console.error('Error updating task status:', error);
-        alert('Error updating task status. Please try again.');
-    })
-    .finally(() => {
-        if (button) {
-            button.disabled = false;
-            button.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh Status';
-        }
-    });
-}
+
+
+
 
 // Initialize auto-update on task list page
 document.addEventListener('DOMContentLoaded', function() {
