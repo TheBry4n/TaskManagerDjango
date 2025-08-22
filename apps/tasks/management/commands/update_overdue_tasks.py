@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from tasks.repository import TaskRepository
+from apps.tasks.repository import TaskRepository
 
 
 class Command(BaseCommand):
