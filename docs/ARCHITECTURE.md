@@ -35,9 +35,7 @@ django-task-manager/
 │   └── tasks/                   # Task management templates
 ├── static/                       # Static files
 │   ├── css/                     # Stylesheets
-│   ├── js/                      # JavaScript files
-│   ├── images/                  # Images and icons
-│   └── fonts/                   # Custom fonts
+│   └── js/                      # JavaScript files
 ├── docs/                         # Documentation
 │   └── ARCHITECTURE.md          # This file
 ├── scripts/                      # Utility scripts
