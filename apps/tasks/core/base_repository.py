@@ -1,4 +1,4 @@
-from typing import TypeVar, Generic, Type, Optional, List
+from typing import TypeVar, Generic, Type, Optional, List, Dict, Any
 from django.db import models
 from django.db.models import QuerySet
 
@@ -32,6 +32,10 @@ class BaseRepository(Generic[T]):
         instance.save()
         return instance
     
+    def bulk_update(self, instances: List[T], fields: List[str]) -> int:
+        """Bulk update multiple instances"""
+        return self.model.objects.bulk_update(instances, fields)
+    
     def delete(self, instance: T) -> bool:
         """Delete an instance of the model"""
         try:
@@ -47,3 +51,11 @@ class BaseRepository(Generic[T]):
     def exists(self, **kwargs) -> bool:
         """Check if any instance exists with the given criteria"""
         return self.model.objects.filter(**kwargs).exists()
+    
+    def count(self, **kwargs) -> int:
+        """Count instances matching the criteria"""
+        return self.model.objects.filter(**kwargs).count()
+    
+    def get_or_create(self, defaults: Dict[str, Any] = None, **kwargs) -> tuple[T, bool]:
+        """Get an instance or create it if it doesn't exist"""
+        return self.model.objects.get_or_create(defaults=defaults, **kwargs)

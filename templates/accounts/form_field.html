@@ -1,0 +1,19 @@
+{% comment %}
+Template partial for form fields with consistent styling and error handling
+Usage: {% include 'accounts/form_field.html' with field=form.field_name label="Field Label" %}
+{% endcomment %}
+
+<div class="mb-3">
+    <label for="{{ field.id_for_label }}" class="form-label">{{ label|default:field.label }}</label>
+    {{ field }}
+    {% if field.errors %}
+        <div class="form-errors">
+            {% for error in field.errors %}
+                <div class="text-danger small">{{ error }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% if field.help_text %}
+        <div class="form-text">{{ field.help_text }}</div>
+    {% endif %}
+</div>

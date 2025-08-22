@@ -6,7 +6,8 @@ from django.views.decorators.http import require_POST
 from .models import Task
 from .repository import TaskRepository
 from .forms import TaskForm, TaskReactivationForm
-from django.utils import timezone
+from .utils import get_task_statistics, format_task_message
+from .constants import TASK_STATUS_ACTIVE, TASK_STATUS_FAILED, VALIDATION_MESSAGES
 
 @login_required
 def task_list(request):
@@ -19,17 +20,8 @@ def task_list(request):
     if updated_count > 0:
         messages.info(request, f'{updated_count} overdue task(s) have been marked as failed.')
 
-    # Get tasks by status (now properly separated)
-    active_tasks = repository.get_active_tasks_by_user(request.user)
-    completed_tasks = repository.get_completed_tasks_by_user(request.user)
-    failed_tasks = repository.get_failed_tasks_by_user(request.user)
-
-    context = {
-        "active_tasks": active_tasks,
-        "completed_tasks": completed_tasks,
-        "failed_tasks": failed_tasks,
-        "total_tasks": active_tasks.count() + completed_tasks.count() + failed_tasks.count(),
-    }
+    # Get task statistics using utility function
+    context = get_task_statistics(request.user)
 
     return render(request, "tasks/task_list.html", context)
 
@@ -49,11 +41,11 @@ def task_create(request):
             
             # Check if the newly created task is overdue and update it immediately
             if task.is_overdue:
-                task.status = "failed"
+                task.status = TASK_STATUS_FAILED
                 task.save()
-                messages.success(request, f'Task "{task.title}" created successfully! (Marked as failed - overdue)')
+                messages.success(request, format_task_message("created", task.title, "Marked as failed - overdue"))
             else:
-                messages.success(request, f'Task "{task.title}" created successfully!')
+                messages.success(request, format_task_message("created", task.title))
             
             return redirect("tasks:task_list")
     else:
@@ -75,7 +67,7 @@ def task_detail(request, task_id):
         messages.error(request, 'Task not found.')
         return redirect("tasks:task_list")
     
-    reactivation_form = TaskReactivationForm() if task.status == "failed" else None
+    reactivation_form = TaskReactivationForm() if task.status == TASK_STATUS_FAILED else None
 
     context = {
         "task" : task,
@@ -92,9 +84,9 @@ def task_complete(request, task_id):
     task = repository.complete_task(task_id, request.user)
     
     if task:
-        messages.success(request, f'Task "{task.title}" marked as completed!')
+        messages.success(request, format_task_message("marked as completed", task.title))
     else:
-        messages.error(request, 'Unable to complete task.')
+        messages.error(request, VALIDATION_MESSAGES['unable_to_complete'])
     
     return redirect("tasks:task_list")
 
@@ -113,9 +105,9 @@ def reactivate_task(request, task_id):
         )
 
         if task:
-            messages.success(request, f'Task "{task.title}" reactivated successfully!')
+            messages.success(request, format_task_message("reactivated", task.title))
         else:
-            messages.error(request, 'Unable to reactivate task.')
+            messages.error(request, VALIDATION_MESSAGES['unable_to_reactivate'])
     else:
         messages.error(request, 'Invalid due date.')
     
@@ -132,8 +124,8 @@ def task_update(request, task_id):
         return redirect("tasks:task_list")
     
     # Only allow editing active tasks
-    if task.status != 'active':
-        messages.error(request, 'Only active tasks can be edited.')
+    if task.status != TASK_STATUS_ACTIVE:
+        messages.error(request, VALIDATION_MESSAGES['only_active_editable'])
         return redirect("tasks:task_detail", task_id=task_id)
     
     if request.method == "POST":
@@ -145,7 +137,7 @@ def task_update(request, task_id):
                 description=form.cleaned_data["description"],
                 due_date=form.cleaned_data["due_date"]
             )
-            messages.success(request, f'Task "{updated_task.title}" updated successfully!')
+            messages.success(request, format_task_message("updated", updated_task.title))
             return redirect("tasks:task_detail", task_id=task_id)
     else:
         form = TaskForm(instance=task)
@@ -161,9 +153,9 @@ def task_delete(request, task_id):
     if task and task.user == request.user:
         task_title = task.title
         repository.delete(task)
-        messages.success(request, f'Task "{task_title}" deleted successfully!')
+        messages.success(request, format_task_message("deleted", task_title))
     else:
-        messages.error(request, "Unable to delete task.")
+        messages.error(request, VALIDATION_MESSAGES['unable_to_delete'])
     
     return redirect("tasks:task_list")
 

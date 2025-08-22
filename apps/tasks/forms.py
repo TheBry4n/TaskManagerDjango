@@ -1,21 +1,9 @@
 from django import forms
 from .models import Task
-from django.utils import timezone
-
-class BaseTaskForm(forms.ModelForm):
-    """Base form for common methods"""
-
-    def clean_future_datetime(self, field_name):
-        """Common validation for future datetime fields"""
-        datetime_value = self.cleaned_data.get(field_name)
-        if datetime_value and datetime_value <= timezone.now():
-            raise forms.ValidationError(
-                f"{field_name.replace('_', ' ').title()} must be in the future"
-            )
-        return datetime_value
+from .utils import validate_future_datetime
 
 
-class TaskForm(BaseTaskForm, forms.ModelForm):
+class TaskForm(forms.ModelForm):
     """Form for creating and updating tasks"""
     class Meta:
         model = Task
@@ -37,7 +25,7 @@ class TaskForm(BaseTaskForm, forms.ModelForm):
         }
     
     def clean_due_date(self):
-        return self.clean_future_datetime('due_date')
+        return validate_future_datetime(self.cleaned_data.get('due_date'), 'due_date')
     
     def clean(self):
         """Custom validation for the form"""
@@ -46,10 +34,8 @@ class TaskForm(BaseTaskForm, forms.ModelForm):
         # For updates, only active tasks can be edited, so always require future dates
         if self.instance and self.instance.pk:
             due_date = cleaned_data.get('due_date')
-            if due_date and due_date <= timezone.now():
-                raise forms.ValidationError(
-                    "Due date must be in the future for active tasks"
-                )
+            if due_date:
+                validate_future_datetime(due_date, 'due_date')
         
         return cleaned_data
 
@@ -65,10 +51,5 @@ class TaskReactivationForm(forms.Form):
     
     def clean_new_due_date(self):
         """Validate that the new due date is in the future"""
-        datetime_value = self.cleaned_data.get('new_due_date')
-        if datetime_value and datetime_value <= timezone.now():
-            raise forms.ValidationError(
-                "New due date must be in the future"
-            )
-        return datetime_value
+        return validate_future_datetime(self.cleaned_data.get('new_due_date'), 'new_due_date')
 

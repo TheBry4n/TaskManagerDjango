@@ -64,29 +64,48 @@ Il server sarà disponibile all'indirizzo: http://127.0.0.1:8000/
 ## 🏗️ Struttura del Progetto
 
 ```
-test_django/
-├── accounts/                 # App per gestione utenti
-│   ├── models.py            # Modelli utente
-│   ├── views.py             # Viste per autenticazione
-│   └── urls.py              # URL per accounts
-├── tasks/                   # App principale per gestione task
-│   ├── models.py            # Modello Task
-│   ├── views.py             # Viste per CRUD task
-│   ├── forms.py             # Form per task
-│   ├── repository.py        # Pattern Repository per accesso dati
-│   ├── core/
-│   │   └── base_repository.py  # Repository base generico
-│   └── management/
-│       └── commands/
-│           └── update_overdue_tasks.py  # Comando per aggiornare task scadute
-├── templates/               # Template HTML
-│   ├── base/
-│   ├── accounts/
-│   └── tasks/
-├── static/                  # File statici (CSS, JS)
-└── myproject/              # Configurazione Django
-    ├── settings.py
-    └── urls.py
+django-task-manager/
+├── apps/                          # Django applications
+│   ├── accounts/                  # User authentication and profiles
+│   │   ├── models.py             # User-related models
+│   │   ├── views.py              # Authentication views
+│   │   ├── urls.py               # Account URLs
+│   │   └── ...
+│   └── tasks/                    # Task management application
+│       ├── models.py             # Task model and properties
+│       ├── views.py              # Task CRUD views
+│       ├── forms.py              # Task forms and validation
+│       ├── repository.py         # Repository pattern implementation
+│       ├── utils.py              # Utility functions
+│       ├── constants.py          # Application constants
+│       ├── mixins.py             # Reusable mixins
+│       ├── core/                 # Core functionality
+│       │   └── base_repository.py # Generic base repository
+│       └── management/           # Django management commands
+│           └── commands/
+│               └── update_overdue_tasks.py
+├── config/                       # Project configuration
+│   └── myproject/               # Django project settings
+│       ├── settings.py          # Main settings file
+│       ├── urls.py              # Root URL configuration
+│       ├── wsgi.py              # WSGI application
+│       └── asgi.py              # ASGI application
+├── templates/                    # HTML templates
+│   ├── base/                    # Base templates
+│   ├── accounts/                # Authentication templates
+│   └── tasks/                   # Task management templates
+├── static/                       # Static files
+│   ├── css/                     # Stylesheets
+│   ├── js/                      # JavaScript files
+│   ├── images/                  # Images and icons
+│   └── fonts/                   # Custom fonts
+├── docs/                         # Documentation
+│   └── ARCHITECTURE.md          # Architecture documentation
+├── scripts/                      # Utility scripts
+│   └── setup.py                 # Project setup script
+├── requirements.txt              # Python dependencies
+├── manage.py                     # Django management script
+└── README.md                     # Project documentation
 ```
 
 ## 🎯 Modello Task
