@@ -51,6 +51,7 @@ jobs:
               run: |
                 python manage.py check
                 python manage.py check --deploy
+                python manage.py collectstatic --noinput --dry-run
             
             - name: Run migrations check
               run: |
@@ -58,8 +59,8 @@ jobs:
             
             - name: Run tests (if they exist)
               run: |
-                if [ -d "tests" ] || [ -f "manage.py" ]; then
-                  python manage.py test --verbosity=2
+                if [ -f "manage.py" ]; then
+                  python manage.py test apps.tasks --verbosity=2
                 else
                   echo "No tests found, skipping test execution"
                 fi

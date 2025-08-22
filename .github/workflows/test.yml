@@ -1,0 +1,88 @@
+name: Test Project Structure
+
+on:
+  push:
+    branches: [ development, master ]
+  pull_request:
+    branches: [ development, master ]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      
+      - name: Cache dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements.txt') }}
+          restore-keys: |
+              ${{ runner.os }}-pip-
+      
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Verify project structure
+        run: |
+          echo "🔍 Checking project structure..."
+          ls -la
+          echo "📁 Apps directory:"
+          ls -la apps/
+          echo "⚙️ Config directory:"
+          ls -la config/
+          echo "📄 Manage.py exists:"
+          test -f manage.py && echo "✅ manage.py found" || echo "❌ manage.py missing"
+      
+      - name: Run Django checks
+        run: |
+          echo "🔧 Running Django checks..."
+          python manage.py check
+          python manage.py check --deploy
+      
+      - name: Run migrations check
+        run: |
+          echo "🗄️ Checking migrations..."
+          python manage.py makemigrations --check --dry-run
+      
+      - name: Run tests
+        run: |
+          echo "🧪 Running tests..."
+          python manage.py test apps.tasks --verbosity=2
+      
+      - name: Test static files
+        run: |
+          echo "📁 Testing static files collection..."
+          python manage.py collectstatic --noinput --dry-run
+      
+      - name: Test management commands
+        run: |
+          echo "⚡ Testing management commands..."
+          python manage.py help update_overdue_tasks
+      
+      - name: Success summary
+        if: success()
+        run: |
+          echo "## ✅ Project Structure Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Status:** All tests passed! 🎉" >> $GITHUB_STEP_SUMMARY
+          echo "**Django Version:** $(python -c 'import django; print(django.get_version())')" >> $GITHUB_STEP_SUMMARY
+          echo "**Python Version:** $(python --version)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### ✅ Verified Components:" >> $GITHUB_STEP_SUMMARY
+          echo "- Project structure (apps/, config/)" >> $GITHUB_STEP_SUMMARY
+          echo "- Django settings and configuration" >> $GITHUB_STEP_SUMMARY
+          echo "- Database migrations" >> $GITHUB_STEP_SUMMARY
+          echo "- Static files collection" >> $GITHUB_STEP_SUMMARY
+          echo "- Management commands" >> $GITHUB_STEP_SUMMARY
+          echo "- Task management tests" >> $GITHUB_STEP_SUMMARY
